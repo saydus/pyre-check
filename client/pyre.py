@@ -464,6 +464,7 @@ def pyre(
     use_command_v2: Optional[bool],
     isolation_prefix: Optional[str],
     python_version: Optional[str],
+    tool_choice: str,
 ) -> int:
     arguments = command_arguments.CommandArguments(
         local_configuration=local_configuration,
@@ -504,6 +505,7 @@ def pyre(
         use_command_v2=use_command_v2,
         isolation_prefix=isolation_prefix,
         python_version=python_version,
+        tool_choice=tool_choice
     )
     if arguments.version:
         _show_pyre_version(arguments)
@@ -806,6 +808,7 @@ def kill(context: click.Context, with_fire: bool) -> int:
 
 @pyre.command()
 @click.option("--no-watchman", is_flag=True, default=False, hidden=True)
+@click.option("--tool", type=click.Choice(['Pyre', 'Pysa'], case_sensitive=False)
 @click.pass_context
 def persistent(context: click.Context, no_watchman: bool) -> int:
     """
@@ -843,6 +846,7 @@ def persistent(context: click.Context, no_watchman: bool) -> int:
                 store_type_check_resolution=False,
                 terminal=False,
                 wait_on_initialization=True,
+                tool_choice="" # TODO: add choice of a tool here to read from args
             ),
         )
     else:

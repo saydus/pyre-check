@@ -50,6 +50,7 @@ class CommandArguments:
     use_command_v2: Optional[bool] = None
     isolation_prefix: Optional[str] = None
     python_version: Optional[str] = None
+    tool_choice: str = TEXT
 
 
 @dataclass(frozen=True)
@@ -71,6 +72,7 @@ class StartArguments:
     store_type_check_resolution: bool = False
     terminal: bool = False
     wait_on_initialization: bool = False
+    tool_choice: str = "pyre"
 
 
 @dataclass(frozen=True)
