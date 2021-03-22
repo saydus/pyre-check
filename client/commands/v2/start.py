@@ -162,6 +162,7 @@ class Arguments:
     strict: bool = False
     taint_models_path: Sequence[str] = dataclasses.field(default_factory=list)
     watchman_root: Optional[Path] = None
+    tool: str = "pyre"
 
     @property
     def local_root(self) -> Optional[str]:
@@ -392,6 +393,7 @@ def create_server_arguments(
         watchman_root=None
         if start_arguments.no_watchman
         else find_watchman_root(Path(configuration.project_root)),
+        tool=tool
     )
 
 

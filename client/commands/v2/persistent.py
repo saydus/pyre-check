@@ -1145,7 +1145,7 @@ class PysaServerHandler(connection.BackgroundTask):
 
 
 async def run_persistent(
-    binary_location: str, server_identifier: str, pyre_arguments: start.Arguments
+    binary_location: str, server_identifier: str, arguments: start.Arguments
 ) -> int:
     stdin, stdout = await connection.create_async_stdin_stdout()
     while True:
@@ -1157,7 +1157,7 @@ async def run_persistent(
             LOG.info("Initialization successful.")
             client_info = initialize_result.client_info
             _log_lsp_event(
-                remote_logging=pyre_arguments.remote_logging,
+                remote_logging=arguments.remote_logging,
                 event=LSPEvent.INITIALIZED,
                 normals=(
                     {}
@@ -1172,21 +1172,39 @@ async def run_persistent(
             client_capabilities = initialize_result.client_capabilities
             LOG.debug(f"Client capabilities: {client_capabilities}")
             initial_server_state = ServerState()
-            server = Server(
-                input_channel=stdin,
-                output_channel=stdout,
-                client_capabilities=client_capabilities,
-                state=initial_server_state,
-                pyre_manager=connection.BackgroundTaskManager(
-                    PyreServerHandler(
-                        binary_location=binary_location,
-                        server_identifier=server_identifier,
-                        pyre_arguments=pyre_arguments,
-                        client_output_channel=stdout,
-                        server_state=initial_server_state,
-                    )
-                ),
-            )
+
+            if arguments.tool == 'pyre':
+                server = Server(
+                    input_channel=stdin,
+                    output_channel=stdout,
+                    client_capabilities=client_capabilities,
+                    state=initial_server_state,
+                    pyre_manager=connection.BackgroundTaskManager(
+                        PyreServerHandler(
+                            binary_location=binary_location,
+                            server_identifier=server_identifier,
+                            pyre_arguments=arguments,
+                            client_output_channel=stdout,
+                            server_state=initial_server_state,
+                        )
+                    ),
+                )
+            else:
+                server = PysaServer(
+                    input_channel=stdin,
+                    output_channel=stdout,
+                    client_capabilities=client_capabilities,
+                    state=initial_server_state,
+                    pyre_manager=connection.BackgroundTaskManager(
+                        PysaServerHandler(
+                            binary_location=binary_location,
+                            server_identifier=server_identifier,
+                            pyre_arguments=arguments,
+                            client_output_channel=stdout,
+                            server_state=initial_server_state,
+                        )
+                    ),
+                )
             return await server.run()
         elif isinstance(initialize_result, InitializationFailure):
             exception = initialize_result.exception
@@ -1204,7 +1222,7 @@ def run(
     start_arguments: command_arguments.StartArguments,
 ) -> int:
     binary_location = configuration.get_binary_respecting_override()
-    if binary_location is None:
+
         raise configuration_module.InvalidConfiguration(
             "Cannot locate a Pyre binary to run."
         )

@@ -806,12 +806,13 @@ def kill(context: click.Context, with_fire: bool) -> int:
 
 @pyre.command()
 @click.option("--no-watchman", is_flag=True, default=False, hidden=True)
+@click.option("--tool", default="pyre", help="Indicates which tool's language server to start ('pyre' or 'pysa')")
 @click.pass_context
-def persistent(context: click.Context, no_watchman: bool) -> int:
+def persistent(context: click.Context, no_watchman: bool, tool: str) -> int:
     """
-    Entry point for IDE integration to Pyre. Communicates with a Pyre server using
+    Entry point for IDE integration to Pyre / Pysa. Communicates with a Pyre / Pysa server using
     the Language Server Protocol, accepts input from stdin and writing diagnostics
-    and responses from the Pyre server to stdout.
+    and responses from the Pyre / Pysa server to stdout.
     """
     command_argument: command_arguments.CommandArguments = context.obj["arguments"]
     configuration = configuration_module.create_configuration(
@@ -843,6 +844,7 @@ def persistent(context: click.Context, no_watchman: bool) -> int:
                 store_type_check_resolution=False,
                 terminal=False,
                 wait_on_initialization=True,
+                tool=tool
             ),
         )
     else:
