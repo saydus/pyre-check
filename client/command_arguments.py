@@ -71,6 +71,7 @@ class StartArguments:
     store_type_check_resolution: bool = False
     terminal: bool = False
     wait_on_initialization: bool = False
+    tool: str = None
 
 
 @dataclass(frozen=True)
